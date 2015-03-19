@@ -24,7 +24,7 @@ Installation
 
 1. Place the files into modules/Users/authentication/CASAuthenticate directory.
 
-    git clone git://github.com/csegarra/SugarCRM-CAS.git modules/Users/authentication/CASAuthenticate
+    git clone git://github.com/gcoop-libre/SugarCRM-CAS.git modules/Users/authentication/CASAuthenticate
 
 2. Edit the config.php file
 
