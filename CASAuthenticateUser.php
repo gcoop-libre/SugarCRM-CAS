@@ -1,73 +1,104 @@
 <?php
+/**
+ * Class that allows SugarCRM/SuiteCRM to perform user authentication using CAS.
+ * php version 5.6+
+ *
+ * @category Login
+ * @package  GCA
+ * @author   David Burke <davidburke@dont-know-address.com>
+ * @author   Al Gorgeous <algorgeous@dont-know-address.com>
+ * @author   gcoop <info@gcoop.coop>
+ * @license  Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0
+ * @link     https://github.com/algorgeous/SugarCRM-CAS
+ */
 
-if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
+if (!defined('sugarEntry') || !sugarEntry) {
+    die('Not A Valid Entry Point');
+}
 
-require_once('modules/Users/authentication/LDAPAuthenticate/LDAPConfigs/default.php');
-require_once('modules/Users/authentication/SugarAuthenticate/SugarAuthenticateUser.php');
-global $sugar_config;
-require_once $sugar_config['cas']['library'];
+require_once 'modules/Users/authentication/LDAPAuthenticate/LDAPConfigs/default.php';
+require_once 'modules/Users/authentication/SugarAuthenticate/SugarAuthenticateUser.php';
+require_once SugarConfig::getInstance()->get('cas.library');
+
 
 /**
  * This is called when a user logs in
  *
- * @param STRING $name
- * @param STRING $password
- * @return boolean
+ * @category Login
+ * @package  GCA
+ * @author   David Burke <davidburke@dont-know-address.com>
+ * @author   Al Gorgeous <algorgeous@dont-know-address.com>
+ * @author   gcoop <info@gcoop.coop>
+ * @license  Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0
+ * @link     https://github.com/algorgeous/SugarCRM-CAS
  */
-class CASAuthenticateUser extends SugarAuthenticateUser {
+class CASAuthenticateUser extends SugarAuthenticateUser
+{
 
     /**
      * This is called when a user logs in
      *
-     * @param STRING $name
-     * @param STRING $password
      * @return boolean
      */
-     function loadUserOnLogin() {
+    public function loadUserOnLogin()
+    {
         $name = $this->authUser();
         if (empty($name)) {
             return false;
-        }
-        else {
+        } else {
             return true;
         }
-     } //end loadUserOnlogin()
+    }
 
-   /**
-    * Attempt to authenticate the user via CAS SSO
-    */
-    function authUser() {
-	      global $sugar_config;
+    /**
+     * Attempt to authenticate the user via CAS SSO
+     *
+     * @return none
+     */
+    public function authUser()
+    {
+        $hostname = SugarConfig::getInstance()->get('cas.hostname');
+        $port = SugarConfig::getInstance()->get('cas.port');
+        $uri = SugarConfig::getInstance()->get('cas.uri');
+        $changeSessionID = SugarConfig::getInstance()->get('cas.changeSessionID');
+        $logoutReturnURL = SugarConfig::getInstance()->get('cas.logout_return_url');
+        $proxies = SugarConfig::getInstance()->get('cas.proxies');
         phpCAS::setDebug();
-        phpCAS::client(CAS_VERSION_2_0, $sugar_config['cas']['hostname'], $sugar_config['cas']['port'], $sugar_config['cas']['uri'], $sugar_config['cas']['changeSessionID']);
-        if ((!empty($sugar_config['cas']['proxies'])) && (is_array($sugar_config['cas']['proxies']))) {
-          phpCAS::allowProxyChain(new CAS_ProxyChain($sugar_config['cas']['proxies']));
+        phpCAS::client(CAS_VERSION_2_0, $hostname, $port, $uri, $changeSessionID);
+
+        if (!empty($proxies) && is_array($proxies)) {
+            phpCAS::allowProxyChain(new CAS_ProxyChain($proxies));
         }
         phpCAS::setNoCasServerValidation();
         phpCAS::forceAuthentication();
         $authenticated = phpCAS::isAuthenticated();
-        if ($authenticated)
-        {
+
+        if ($authenticated) {
             $user_name = phpCAS::getUser();
 
-	    $dbresult = $GLOBALS['db']->query("SELECT id, status FROM users WHERE user_name='" . $user_name . "' AND deleted = 0");			
+            $dbresult = DBManagerFactory::getInstance()->query(
+                "SELECT id, status FROM users WHERE user_name='"
+                .$user_name . "' AND deleted = 0"
+            );
             // User already exists use this one
-            if ($row = $GLOBALS['db']->fetchByAssoc($dbresult)) {
-                if ($row['status'] != 'Inactive')
+            if ($row = DBManagerFactory::getInstance()->fetchByAssoc($dbresult)) {
+                if ($row['status'] != 'Inactive') {
                     return $this->loadUserOnSession($row['id']);
-                else
+                } else {
                     return '';
+                }
             }
-       	    echo 'Not authorized user. You may need to ask an administrator to give you access to SugarCRM. You may try logging in again <a href="https://' . $sugar_config['cas']['hostname'] . ':443/cas/logout?service=http://' . $_SERVER['SERVER_NAME'] . '">here</a>';
-	    die();
+            $text = 'Not authorized user.'
+                  .' You may need to ask an administrator to give you access'
+                  .' to SugarCRM/SuiteCRM. You may try logging in again'
+                  .' <a href="https://' . $hostname
+                  . ':443/cas/logout?service=http://' . $_SERVER['SERVER_NAME']
+                  . '">here</a>';
+            echo $text;
+            die();
             return ""; // SSO authentication was successful
-        }
-        else // not authenticated in CAS.
-        {
+        } else {
             return;
         }
-    } //end authenticateSSO();
-
-} //End CASAuthenticateUser class.
-
-?>
+    }
+}
