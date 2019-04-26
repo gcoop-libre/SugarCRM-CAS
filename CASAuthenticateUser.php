@@ -69,6 +69,8 @@ class CASAuthenticateUser extends SugarAuthenticateUser
         if (!empty($proxies) && is_array($proxies)) {
             phpCAS::allowProxyChain(new CAS_ProxyChain($proxies));
         }
+
+        $this->fromCASProxyWithTicket();
         phpCAS::setNoCasServerValidation();
         phpCAS::forceAuthentication();
         $authenticated = phpCAS::isAuthenticated();
@@ -100,5 +102,48 @@ class CASAuthenticateUser extends SugarAuthenticateUser
         } else {
             return;
         }
+    }
+
+
+    /**
+     * Returns true or false if http_referer host is in Proxies list.
+     * If so, phpCAS allows this proxy.
+     *
+     * @return bool
+     */
+    public function fromCASProxyWithTicket()
+    {
+        $http_ref = parse_url(@$_SERVER['HTTP_REFERER']);
+        $proxies = SugarConfig::getInstance()->get('cas.proxies');
+
+        if (!empty($proxies)
+            && is_array($proxies)
+            && !empty($_REQUEST['ticket'])
+            && !empty($http_ref)
+            && is_array($http_ref)
+            && !empty($http_ref['host'])
+        ) {
+            foreach ($proxies as $proxy) {
+                $proxy_host = parse_url($proxy);
+                $msg = 'fromCASProxyWithTicket:'
+                .' proxy_host: '.$proxy_host['host']
+                .' http_ref: '.$http_ref['host'];
+                LoggerManager::getLogger()->debug($msg);
+
+                if (!empty($proxy_host['host'])
+                    && $http_ref['host'] == $proxy_host['host']
+                ) {
+                        $msg = 'fromCASProxyWithTicket:'
+                            .' host: '.$http_ref['host']
+                            .' ticket: '.$_REQUEST['ticket']
+                            .' proxy: '.$proxy;
+                        LoggerManager::getLogger()->info($msg);
+                        phpCAS::allowProxyChain(new CAS_ProxyChain(array($proxy)));
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
