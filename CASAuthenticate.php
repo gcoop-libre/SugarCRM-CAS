@@ -10,7 +10,7 @@
  * @author   Al Gorgeous <algorgeous@dont-know-address.com>
  * @author   gcoop <info@gcoop.coop>
  * @license  Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0
- * @link     https://github.com/algorgeous/SugarCRM-CAS
+ * @link     https://github.com/gcoop-libre/SugarCRM-CAS
  */
 
 
@@ -30,13 +30,13 @@ require_once SugarConfig::getInstance()->get('cas.library');
  * @author   Al Gorgeous <algorgeous@dont-know-address.com>
  * @author   gcoop <info@gcoop.coop>
  * @license  Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0
- * @link     https://github.com/algorgeous/SugarCRM-CAS
+ * @link     https://github.com/gcoop-libre/SugarCRM-CAS
  */
 
 class CASAuthenticate extends SugarAuthenticate
 {
-    var $userAuthenticateClass = 'CASAuthenticateUser';
-    var $authenticationDir = 'CASAuthenticate';
+    public $userAuthenticateClass = 'CASAuthenticateUser';
+    public $authenticationDir = 'CASAuthenticate';
 
 
     /**
