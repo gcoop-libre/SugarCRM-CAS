@@ -142,7 +142,7 @@ class CASAuthenticate extends SugarAuthenticate
     {
         global $action, $allowedActions;
 
-        $uniqueKey = SugarConfig::getInstance()->get(unique_key);
+        $uniqueKey = SugarConfig::getInstance()->get('unique_key');
 
         $_SESSION['userTime']['last'] = time();
         $user_unique_key = (isset($_SESSION['unique_key'])) ?
