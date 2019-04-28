@@ -1,4 +1,4 @@
-SugarCRM CAS Authentication
+SuiteCRM CAS Authentication
 ===========================
 
 Original credit goes to David Burke
@@ -7,7 +7,7 @@ CASAuthenticate class files.
 
 Forked from Alfred Bacon's repo (https://github.com/algorgeous/SugarCRM-CAS).
 
-This is a class for SugarCRM (http://sugarcrm.com) that allows you to
+This is a class for SuiteCRM (https://suitecrm.com/) that allows you to
 authenticate with a CAS server.
 
 phpCAS is an authentication library that allows PHP applications to easily
