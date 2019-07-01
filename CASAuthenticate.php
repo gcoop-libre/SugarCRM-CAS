@@ -55,27 +55,6 @@ class CASAuthenticate extends SugarAuthenticate
 
 
     /**
-     * Deprecated since version SuiteCRM7.6.
-     * PHP4 Style Constructors are deprecated and will be removed in 8.0,
-     * please update your code, use __construct instead
-     *
-     * @return none
-     */
-    public function CASAuthenticate()
-    {
-        $deprecatedMessage
-            = 'PHP4 Style Constructors are deprecated'.
-            ' and will be remove in SuiteCRM 8.0, please update your code';
-
-        if (LoggerManager::getLogger() !== null) {
-            LoggerManager::getLogger()->deprecated($deprecatedMessage);
-        } else {
-            trigger_error($deprecatedMessage, E_USER_DEPRECATED);
-        }
-        self::__construct();
-    }
-
-    /**
      * Do CAS Auth.
      *
      * @return none
