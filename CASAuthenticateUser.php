@@ -63,8 +63,9 @@ class CASAuthenticateUser extends SugarAuthenticateUser
         $changeSessionID = SugarConfig::getInstance()->get('cas.changeSessionID');
         $logoutReturnURL = SugarConfig::getInstance()->get('cas.logout_return_url');
         $proxies = SugarConfig::getInstance()->get('cas.proxies');
-        phpCAS::setDebug();
+        $logFile = SugarConfig::getInstance()->get('cas.log_dir_file');
         phpCAS::client(CAS_VERSION_2_0, $hostname, $port, $uri, $changeSessionID);
+        phpCAS::setDebug($logFile);
 
         if (!empty($proxies) && is_array($proxies)) {
             phpCAS::allowProxyChain(new CAS_ProxyChain($proxies));
